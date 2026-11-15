@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VYRO - متجر الأناقة العصري</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f5f5f5', 900: '#111111', accent: '#e63946' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .marquee { overflow: hidden; white-space: nowrap; }
+        .marquee-content { display: inline-block; animation: marquee 25s linear infinite; }
+        @keyframes marquee { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 flex flex-col min-h-screen">
+
+    <!-- Marquee Announcement Banner -->
+    <div id="announcement-banner" class="bg-black text-white text-xs py-2 overflow-hidden">
+        <div class="marquee font-medium">
+            <span class="marquee-content" id="banner-text">
+                🔥 عروض الشتاء الكبرى في متجر VYRO - الشحن ثابت 100ج لجميع المحافظات! 🚚 &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 🔥 عروض الشتاء الكبرى في متجر VYRO - الشحن ثابت 100ج لجميع المحافظات! 🚚
+            </span>
+        </div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="#" class="text-2xl font-black tracking-wider text-black">VYRO<span class="text-red-600">.</span></a>
+            </div>
+            <div class="flex items-center gap-4">
+                <nav class="hidden md:flex items-center gap-6 text-sm font-bold">
+                    <a href="#products-section" class="hover:text-red-600 transition">المنتجات</a>
+                    <a href="#about-section" class="hover:text-red-600 transition">هويتنا (About)</a>
+                    <a href="#policy-section" class="hover:text-red-600 transition">السياسات</a>
+                </nav>
+                <!-- Language Switcher -->
+                <button onclick="toggleLanguage()" id="lang-btn" class="text-xs font-bold border px-3 py-1.5 rounded-lg hover:bg-gray-100 transition">EN</button>
+                <button onclick="openCart()" class="relative p-2 text-gray-700 hover:text-black transition">
+                    <i class="fa-solid fa-bag-shopping text-xl"></i>
+                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <!-- Hero Section -->
+        <div class="relative rounded-2xl bg-black text-white overflow-hidden mb-12 p-8 sm:p-12 flex flex-col justify-center items-start shadow-xl">
+            <div class="relative z-10 max-w-xl">
+                <span id="hero-tag" class="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block">تشكيلة الشتاء 2026</span>
+                <h1 id="hero-title" class="text-3xl sm:text-5xl font-black tracking-tight mb-4">أناقتك تبدأ من هنا مع VYRO</h1>
+                <p id="hero-desc" class="text-gray-300 text-sm sm:text-base mb-6">تسوق أحدث صيحات الـ Streetwear والملابس العصرية بجودة عالية وأسعار تنافسية.</p>
+                <a href="#products-section" id="hero-btn" class="bg-white text-black font-bold px-6 py-3 rounded-xl hover:bg-gray-100 transition shadow-md">تسوق المنتجات الآن</a>
+            </div>
+        </div>
+
+        <!-- Filter Categories -->
+        <div class="flex flex-wrap items-center gap-2 mb-8">
+            <button onclick="filterCategory('all')" class="cat-btn active bg-black text-white px-4 py-2 rounded-xl text-xs font-bold transition">الكل (All)</button>
+            <button onclick="filterCategory('hoodie')" class="cat-btn bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition">هودي (Hoodie)</button>
+            <button onclick="filterCategory('zipper')" class="cat-btn bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition">زيبر (Zipper)</button>
+            <button onclick="filterCategory('round')" class="cat-btn bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition">راوند (Round)</button>
+        </div>
+
+        <!-- Products Section -->
+        <div id="products-section" class="mb-6 flex justify-between items-center">
+            <h2 class="text-2xl font-black tracking-tight">منتجاتنا المميزة</h2>
+            <span id="product-count" class="text-xs text-gray-500 font-medium">جاري التحميل من السحابة...</span>
+        </div>
+
+        <!-- Product Grid -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-16">
+            <!-- Dynamic Products Injected via Supabase -->
+        </div>
+
+        <!-- About Section -->
+        <section id="about-section" class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm mb-12">
+            <h3 class="text-xl font-black mb-4 flex items-center gap-2"><i class="fa-solid fa-gem text-red-600"></i> من نحن (VYRO Brand)</h3>
+            <p class="text-gray-600 text-sm leading-relaxed">
+                ڤايرو (VYRO) هو براند مصري عصري متخصص في الـ Streetwear والملابس الشبابية الفخمة. هدفنا تقديم خامات عالية الجودة، وتصميمات فريدة تليق بأسلوب حياتك اليومي وبأفضل الأسعار في مصر.
+            </p>
+        </section>
+
+        <!-- Policy Section -->
+        <section id="policy-section" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <h4 class="font-black text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-truck-fast text-red-600"></i> سياسة الشحن</h4>
+                <p class="text-xs text-gray-600 leading-relaxed">
+                    الشحن متوفر لجميع محافظات مصر. سعر الشحن ثابت بقيمة <strong>100 جنيه مصري</strong> لجميع المحافظات، ويتم تسليم الطلب خلال 2 إلى 4 أيام عمل.
+                </p>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <h4 class="font-black text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-rotate-left text-red-600"></i> الاستبدال والاسترجاع</h4>
+                <p class="text-xs text-gray-600 leading-relaxed">
+                    يحق للعميل استبدال أو استرجاع المنتج خلال 14 يوماً من تاريخ الاستلام بشرط أن يكون المنتج بحالته الأصلية وبنفس التغليف.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white mt-16 py-10 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-xs text-gray-400">© 2026 VYRO Store. جميع الحقوق محفوظة.</p>
+            <button onclick="openAdminLoginModal()" class="text-xs text-gray-500 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-lock text-[10px]"></i> لوحة التحكم (VYRO.)
+            </button>
+        </div>
+    </footer>
+
+    <!-- Cart Slide-over Drawer -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden">
+        <div class="absolute inset-0 bg-black/50 transition-opacity" onclick="closeCart()"></div>
+        <div class="absolute inset-y-0 left-0 max-w-full flex pl-10">
+            <div class="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+                <div class="p-6 flex items-center justify-between border-b">
+                    <h3 class="text-lg font-bold">سلة المشتريات</h3>
+                    <button onclick="closeCart()" class="text-gray-400 hover:text-black"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4">
+                    <!-- Cart items -->
+                </div>
+                <!-- Payment Methods Section -->
+                <div class="px-6 py-3 border-t bg-gray-50 space-y-2">
+                    <label class="block text-xs font-bold text-gray-700">اختر طريـقـة الدفـع:</label>
+                    <select id="payment-method" class="w-full border rounded-xl px-3 py-2 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-black">
+                        <option value="الدفع عند الاستلام">💵 الدفع عند الاستلام (Cash on Delivery)</option>
+                        <option value="فودافون كاش">🔴 فودافون كاش</option>
+                        <option value="إنستا باي (InstaPay)">🟣 إنستا باي (InstaPay)</option>
+                    </select>
+                    <div class="text-[11px] text-gray-600 bg-white p-2 rounded-lg border space-y-1">
+                        <p>🔗 <strong>إنستا باي:</strong> <a href="Https://ipn.eg/S/ahmedhamedelraey/instapay/0vDwXh" target="_blank" class="text-blue-600 underline">اضغط للتحويل المباشر</a></p>
+                        <p>🔴 <strong>فودافون كاش:</strong> <a href="http://vf.eg/vfcash?id=mt&qrId=YAl88m" target="_blank" class="text-red-600 underline">اضغط للتحويل المباشر</a></p>
+                    </div>
+                    <p class="text-[11px] text-gray-500">ملاحظة: تكلفة الشحن الثابتة <span class="font-bold text-black">100 ج.م</span> تُضاف للإجمالي.</p>
+                </div>
+                <div class="p-6 border-t bg-gray-100">
+                    <div class="flex justify-between mb-2 text-sm">
+                        <span>قيمة المنتجات:</span>
+                        <span id="cart-subtotal">0 ج.م</span>
+                    </div>
+                    <div class="flex justify-between mb-3 text-sm">
+                        <span>الشحن:</span>
+                        <span>100 ج.م</span>
+                    </div>
+                    <div class="flex justify-between mb-4 font-bold text-lg border-t pt-2">
+                        <span>الإجمالي الكلي:</span>
+                        <span id="cart-total">100 ج.م</span>
+                    </div>
+                    <button onclick="checkoutWhatsApp()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fa-brands fa-whatsapp text-xl"></i> إتمام الطلب عبر واتساب
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 hidden">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl mx-4">
+            <h3 class="text-lg font-bold mb-4">تسجيل دخول الإدارة</h3>
+            <input type="password" id="admin-password-input" placeholder="أدخل كلمة المرور (vyro1234)" class="w-full border rounded-xl px-4 py-3 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-black">
+            <div class="flex gap-2">
+                <button onclick="verifyAdminPassword()" class="flex-1 bg-black text-white py-2.5 rounded-xl font-bold text-sm">دخول</button>
+                <button onclick="closeAdminLoginModal()" class="px-4 bg-gray-200 text-gray-700 py-2.5 rounded-xl font-bold text-sm">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard Modal -->
+    <div id="admin-dashboard-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 hidden">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">لوحة تحكم VYRO (السحابية)</h3>
+                <button onclick="closeAdminDashboard()" class="text-gray-400 hover:text-black"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <!-- Add New Product Form -->
+            <div class="bg-gray-50 p-4 rounded-xl mb-6 border">
+                <h4 class="font-bold text-sm mb-3 text-black">➕ إضافة منتج جديد للقاعدة السحابية</h4>
+                <div class="space-y-3">
+                    <input type="text" id="new-p-name" placeholder="اسم المنتج (مثال: هودي أسود بريميوم)" class="w-full border rounded-lg px-3 py-2 text-xs bg-white">
+                    <input type="number" id="new-p-price" placeholder="السعر (بالجنيه المصري)" class="w-full border rounded-lg px-3 py-2 text-xs bg-white">
+                    <select id="new-p-category" class="w-full border rounded-lg px-3 py-2 text-xs bg-white">
+                        <option value="hoodie">هودي (Hoodie)</option>
+                        <option value="zipper">زيبر (Zipper)</option>
+                        <option value="round">راوند (Round)</option>
+                    </select>
+                    <input type="text" id="new-p-image" placeholder="رابط صورة المنتج (Image URL)" class="w-full border rounded-lg px-3 py-2 text-xs bg-white">
+                    <button onclick="addNewProduct()" class="w-full bg-black text-white py-2.5 rounded-lg text-xs font-bold hover:bg-gray-800 transition">حفظ في قاعدة البيانات</button>
+                </div>
+            </div>
+
+            <!-- Banner edit -->
+            <div class="mb-6">
+                <label class="block text-xs font-bold mb-2">تعديل نص الشريط المتحرك:</label>
+                <input type="text" id="edit-banner-input" class="w-full border rounded-xl px-4 py-2 text-xs mb-2">
+                <button onclick="saveBanner()" class="bg-black text-white px-4 py-2 rounded-xl text-xs font-bold">حفظ الشريط</button>
+            </div>
+            <hr class="my-6">
+            <h4 class="font-bold mb-4 text-sm">المنتجات الحالية في السحابة (إدارة وحذف)</h4>
+            <div id="admin-products-list" class="space-y-3 mb-6"></div>
+        </div>
+    </div>
+
+    <!-- JavaScript & Supabase Integration -->
+    <script>
+        const SUPABASE_URL = 'https://rlyumbsxoqykfdyvktbl.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_lR7iDXmLftE8UWPr9eoR4Q_8YTPnqtQ';
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let products = [];
+        let cart = JSON.parse(localStorage.getItem('vyro_cart')) || [];
+        let bannerText = localStorage.getItem('vyro_banner') || document.getElementById('banner-text').innerText;
+        let currentLang = 'ar';
+        let currentCategory = 'all';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchProductsFromSupabase();
+            updateCartBadge();
+            document.getElementById('banner-text').innerText = bannerText;
+            document.getElementById('edit-banner-input').value = bannerText;
+        });
+
+        async function fetchProductsFromSupabase() {
+            const { data, error } = await supabaseClient.from('products').select('*');
+            if (error) {
+                console.error('Error fetching products:', error);
+                document.getElementById('product-count').innerText = 'خطأ في الاتصال بقاعدة البيانات';
+                return;
+            }
+            products = data || [];
+            renderProducts();
+            if(!document.getElementById('admin-dashboard-modal').classList.contains('hidden')) {
+                renderAdminProducts();
+            }
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-black', 'text-white');
+                btn.classList.add('bg-white', 'text-gray-700');
+            });
+            event.target.classList.remove('bg-white', 'text-gray-700');
+            event.target.classList.add('bg-black', 'text-white');
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
+            
+            const filtered = currentCategory === 'all' ? products : products.filter(p => p.category === currentCategory);
+            document.getElementById('product-count').innerText = `${filtered.length} منتج متوفر`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-12">لا توجد منتجات في هذا القسم حالياً</p>';
+                return;
+            }
+
+            filtered.forEach(product => {
+                grid.innerHTML += `
+                    <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col">
+                        <div class="relative h-64 overflow-hidden bg-gray-100">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                            <span class="absolute top-3 right-3 bg-black/70 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">${product.category}</span>
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow">
+                            <h3 class="font-bold text-base mb-2">${product.name}</h3>
+                            <!-- Size Selector -->
+                            <div class="mb-4">
+                                <label class="block text-[11px] font-bold text-gray-500 mb-1">اختر المقاس (Size):</label>
+                                <select id="size-${product.id}" class="w-full border rounded-lg px-2 py-1.5 text-xs bg-gray-50 focus:outline-none">
+                                    <option value="S">S</option>
+                                    <option value="M">M</option>
+                                    <option value="L" selected>L</option>
+                                    <option value="XL">XL</option>
+                                    <option value="XXL">XXL</option>
+                                </select>
+                            </div>
+                            <div class="mt-auto flex items-center justify-between">
+                                <span class="font-black text-lg">${product.price} ج.م</span>
+                                <button onclick="addToCart(${product.id})" class="bg-black text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition">إضافة للسلة</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const sizeSelect = document.getElementById(`size-${id}`);
+            const selectedSize = sizeSelect ? sizeSelect.value : 'L';
+
+            const existing = cart.find(item => item.id === id && item.size === selectedSize);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ ...product, size: selectedSize, quantity: 1 });
+            }
+            saveCart();
+            openCart();
+        }
+
+        function updateCartBadge() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-badge').innerText = count;
+        }
+
+        function saveCart() {
+            localStorage.setItem('vyro_cart', JSON.stringify(cart));
+            updateCartBadge();
+            renderCartItems();
+        }
+
+        function openCart() {
+            document.getElementById('cart-drawer').classList.remove('hidden');
+            renderCartItems();
+        }
+
+        function closeCart() {
+            document.getElementById('cart-drawer').classList.add('hidden');
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items');
+            container.innerHTML = '';
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-400 py-8 text-sm">سلة المشتريات فارغة</p>';
+                document.getElementById('cart-subtotal').innerText = '0 ج.م';
+                document.getElementById('cart-total').innerText = '100 ج.م';
+                return;
+            }
+
+            let subtotal = 0;
+            cart.forEach((item, index) => {
+                subtotal += item.price * item.quantity;
+                container.innerHTML += `
+                    <div class="flex items-center justify-between gap-4 border-b pb-4">
+                        <div>
+                            <h4 class="font-bold text-sm">${item.name}</h4>
+                            <p class="text-xs text-gray-500">المقاس: <span class="font-bold text-black">${item.size}</span> | ${item.price} ج.م × ${item.quantity}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="changeQty(${index}, 1)" class="w-7 h-7 bg-gray-100 rounded-lg font-bold flex items-center justify-center">+</button>
+                            <span class="text-sm font-bold">${item.quantity}</span>
+                            <button onclick="changeQty(${index}, -1)" class="w-7 h-7 bg-gray-100 rounded-lg font-bold flex items-center justify-center">-</button>
+                        </div>
+                    </div>
+                `;
+            });
+            const shipping = 100;
+            const total = subtotal + shipping;
+            document.getElementById('cart-subtotal').innerText = `${subtotal} ج.م`;
+            document.getElementById('cart-total').innerText = `${total} ج.م`;
+        }
+
+        function changeQty(index, delta) {
+            cart[index].quantity += delta;
+            if (cart[index].quantity <= 0) cart.splice(index, 1);
+            saveCart();
+        }
+
+        function checkoutWhatsApp() {
+            if (cart.length === 0) return alert('السلة فارغة!');
+            const paymentMethod = document.getElementById('payment-method').value;
+            let subtotal = 0;
+            let text = "🛒 *طلب جديد من متجر VYRO:*\n\n";
+            cart.forEach(item => {
+                text += `▪️ ${item.name} (المقاس: ${item.size}) - الكمية: ${item.quantity} - ${item.price * item.quantity} ج.م\n`;
+                subtotal += item.price * item.quantity;
+            });
+            const shipping = 100;
+            const total = subtotal + shipping;
+            text += `\n📦 *الشحن:* ${shipping} ج.م (لجميع المحافظات)`;
+            text += `\n💳 *طريقة الدفع:* ${paymentMethod}`;
+            
+            if(paymentMethod.includes('فودافون كاش')) {
+                text += `\n🔗 *رابط التحويل فودافون كاش:* http://vf.eg/vfcash?id=mt&qrId=YAl88m`;
+            } else if(paymentMethod.includes('إنستا باي')) {
+                text += `\n🔗 *رابط التحويل إنستا باي:* Https://ipn.eg/S/ahmedhamedelraey/instapay/0vDwXh`;
+            }
+
+            text += `\n💰 *الإجمالي الكلي:* ${total} ج.م`;
+            text += `\n\n📌 يرجى إرسال إيصال التحويل (عند الدفع إلكترونياً) لتأكيد الطلب.`;
+            
+            const phone = "201111111111";
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            const btn = document.getElementById('lang-btn');
+            if (currentLang === 'en') {
+                btn.innerText = 'AR';
+                document.documentElement.setAttribute('lang', 'en');
+                document.documentElement.setAttribute('dir', 'ltr');
+                document.getElementById('hero-tag').innerText = 'WINTER COLLECTION 2026';
+                document.getElementById('hero-title').innerText = 'Your Style Starts Here With VYRO';
+                document.getElementById('hero-desc').innerText = 'Shop the latest streetwear and trendy apparel with high quality and best prices.';
+                document.getElementById('hero-btn').innerText = 'Shop Products Now';
+            } else {
+                btn.innerText = 'EN';
+                document.documentElement.setAttribute('lang', 'ar');
+                document.documentElement.setAttribute('dir', 'rtl');
+                document.getElementById('hero-tag').innerText = 'تشكيلة الشتاء 2026';
+                document.getElementById('hero-title').innerText = 'أناقتك تبدأ من هنا مع VYRO';
+                document.getElementById('hero-desc').innerText = 'تسوق أحدث صيحات الـ Streetwear والملابس العصرية بجودة عالية وأسعار تنافسية.';
+                document.getElementById('hero-btn').innerText = 'تسوق المنتجات الآن';
+            }
+        }
+
+        function openAdminLoginModal() { document.getElementById('admin-login-modal').classList.remove('hidden'); }
+        function closeAdminLoginModal() { document.getElementById('admin-login-modal').classList.add('hidden'); }
+        
+        function verifyAdminPassword() {
+            const pass = document.getElementById('admin-password-input').value;
+            if (pass === 'vyro1234') {
+                closeAdminLoginModal();
+                document.getElementById('admin-dashboard-modal').classList.remove('hidden');
+                renderAdminProducts();
+            } else {
+                alert('كلمة المرور غير صحيحة!');
+            }
+        }
+        function closeAdminDashboard() { document.getElementById('admin-dashboard-modal').classList.add('hidden'); }
+
+        function saveBanner() {
+            const val = document.getElementById('edit-banner-input').value;
+            localStorage.setItem('vyro_banner', val);
+            document.getElementById('banner-text').innerText = val;
+            alert('تم حفظ الشريط بنجاح!');
+        }
+
+        async function addNewProduct() {
+            const name = document.getElementById('new-p-name').value;
+            const price = parseFloat(document.getElementById('new-p-price').value);
+            const category = document.getElementById('new-p-category').value;
+            const image = document.getElementById('new-p-image').value;
+
+            if (!name || !price || !image) {
+                alert('يرجى ملء جميع بيانات المنتج المطلوبة!');
+                return;
+            }
+
+            const { data, error } = await supabaseClient
+                .from('products')
+                .insert([{ name, price, category, image }])
+                .select();
+
+            if (error) {
+                console.error('Error adding product:', error);
+                alert('حدث خطأ أثناء حفظ المنتج في قاعدة البيانات!');
+                return;
+            }
+
+            alert('تم حفظ المنتج في السحابة بنجاح!');
+            document.getElementById('new-p-name').value = '';
+            document.getElementById('new-p-price').value = '';
+            document.getElementById('new-p-image').value = '';
+            
+            fetchProductsFromSupabase();
+        }
+
+        function renderAdminProducts() {
+            const list = document.getElementById('admin-products-list');
+            list.innerHTML = '';
+            products.forEach((p) => {
+                list.innerHTML += `
+                    <div class="flex items-center justify-between border p-3 rounded-xl bg-white">
+                        <span class="text-xs font-bold">${p.name} (${p.category}) - ${p.price} ج.م</span>
+                        <button onclick="deleteProduct(${p.id})" class="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-xs font-bold">حذف</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function deleteProduct(id) {
+            const { error } = await supabaseClient
+                .from('products')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                console.error('Error deleting product:', error);
+                alert('تعذر حذف المنتج!');
+                return;
+            }
+
+            fetchProductsFromSupabase();
+        }
+    </script>
+</body>
+</html>
